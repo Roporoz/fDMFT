@@ -7,7 +7,7 @@ CXX = g++
 CXXFLAGS = -O2 -Wall -Wextra -fopenmp
 LEGACY_CXXFLAGS = -O2 -fopenmp -std=gnu++14  # see legacy/Makefile
 
-all: test_linalg test_impurity_raw test_impurity_fine
+all: test_linalg test_impurity_raw test_impurity_fine test_dmft_loop
 
 test_linalg: test_linalg.o legacy_bridge.o ../src/dmft/linalg.o
 	$(CXX) -fopenmp -o $@ $^
@@ -45,10 +45,23 @@ impurity_fine_bridge.o: impurity_fine_bridge.cpp impurity_fine_bridge.hpp ../leg
 ../src/dmft/impurity_fine.o: ../src/dmft/impurity_fine.cpp ../src/dmft/impurity_fine.hpp
 	$(CXX) $(CXXFLAGS) -std=c++17 -c $< -o $@
 
+test_dmft_loop: test_dmft_loop.o dmft_loop_bridge.o ../src/dmft/dmft_loop.o ../src/dmft/impurity_fine.o ../src/dmft/impurity_raw.o ../src/dmft/linalg.o
+	$(CXX) -fopenmp -o $@ $^
+
+test_dmft_loop.o: test_dmft_loop.cpp ../src/dmft/dmft_loop.hpp dmft_loop_bridge.hpp
+	$(CXX) $(CXXFLAGS) -std=c++17 -c $< -o $@
+
+dmft_loop_bridge.o: dmft_loop_bridge.cpp dmft_loop_bridge.hpp ../legacy/headers.new.h ../legacy/parameters.cpp ../legacy/solver.cpp
+	$(CXX) $(LEGACY_CXXFLAGS) -c $< -o $@
+
+../src/dmft/dmft_loop.o: ../src/dmft/dmft_loop.cpp ../src/dmft/dmft_loop.hpp ../src/dmft/lattice.hpp
+	$(CXX) $(CXXFLAGS) -std=c++17 -c $< -o $@
+
 check: all
 	./test_linalg
 	./test_impurity_raw
 	./test_impurity_fine
+	./test_dmft_loop
 
 clean:
-	rm -f test_linalg test_impurity_raw test_impurity_fine *.o ../src/dmft/*.o
+	rm -f test_linalg test_impurity_raw test_impurity_fine test_dmft_loop *.o ../src/dmft/*.o
