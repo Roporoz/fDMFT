@@ -3,4 +3,9 @@
 *.log
 dmft_legacy
 legacy/dmft_legacy
+src/dmft_solver
+tests/test_linalg
+tests/test_impurity_raw
+tests/test_impurity_fine
+tests/test_dmft_loop
 build/
