@@ -35,11 +35,15 @@ private:
 // w in [0, n_terms), remembering the running total at the Nw/2 and 3Nw/4
 // marks, then combine all three as 8*a - 9*a3 + 2*a2 (a 3-point Richardson-
 // style extrapolation). Appeared verbatim, independently, in solver_raw::
-// s()/n()/dszdh()/dsxdh()/adjust_bath_couplings()/adjust_bath_levels() --
-// this factors that one pattern out instead of re-deriving it each time.
+// s()/n()/dszdh()/dsxdh()/adjust_bath_couplings()/adjust_bath_levels(), and
+// again (accumulating Complex rather than double, with the real part taken
+// only after combining) in solver_fine::scalar() -- this factors that one
+// pattern out instead of re-deriving it each time. The accumulator type is
+// whatever `term` returns (double or Complex).
 template <typename Term>
-double extrapolated_matsubara_sum(int n_terms, Term term) {
-    double a = 0.0, a2 = 0.0, a3 = 0.0;
+auto extrapolated_matsubara_sum(int n_terms, Term term) -> decltype(term(0)) {
+    using Value = decltype(term(0));
+    Value a{}, a2{}, a3{};
     for (int w = 0; w < n_terms; ++w) {
         a += term(w);
         if (w + 1 == n_terms / 2) a2 = a;
