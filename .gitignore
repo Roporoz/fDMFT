@@ -1,0 +1,6 @@
+*.o
+*.dat
+*.log
+dmft_legacy
+legacy/dmft_legacy
+build/
